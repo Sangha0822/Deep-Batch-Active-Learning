@@ -1,0 +1,2 @@
+Round: 1, Labeled Samples: 200, Test Accuracy: 69.98%
+Round: 2, Labeled Samples: 300, Test Accuracy: 66.29%

@@ -12,6 +12,29 @@ import model as model
 import numpy as np
 from torch.utils.data import Subset
 
+from sklearn.cluster import kmeans_plusplus
+
+def kmeans_pp (embedding, batch_size):
+    embedding_np = embedding.cpu().numpy()
+    _, indicies = kmeans_plusplus(embedding_np,n_clusters= batch_size)
+    return indicies
+
+
+def compute_gradient_embedding(DataLoader, model, optimizer, loss_fn, device):
+    gradient_list = []
+    model.eval()
+    for X, y in DataLoader:
+        X,y = X.to(device), y.to(device)
+
+        logits = model(X)
+        logits = torch.clamp(logits, min=-20, max=20)
+        preds = torch.argmax(logits, dim=1)
+        loss = loss_fn(logits,preds)
+        optimizer.zero_grad()
+        loss.backward()
+        last_layer_gradient = model.layers[5].weight.grad
+        gradient_list.append(last_layer_gradient.clone().detach().flatten())
+    return torch.stack(gradient_list, dim=0)
 
 def train(epochs, model, train_dataloader, test_dataloader, loss_fn, optimizer, device):
 
@@ -35,6 +58,7 @@ def train(epochs, model, train_dataloader, test_dataloader, loss_fn, optimizer, 
 
             optimizer.zero_grad()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
 
 
@@ -136,7 +160,7 @@ if __name__ == "__main__":
     print(f"Initial unlabeled pool size: {len(unlabeled_indices)}")
     print("---------------------------------")
 
-    results_file = open("results_random.txt", "w")
+    results_file = open("results_badge.txt", "w")
 
     for i in range(QUERY_ROUNDS):
         model_0 = model.ModelV0().to(device)
@@ -153,7 +177,7 @@ if __name__ == "__main__":
                                              batch_size= BATCH_SIZE,
                                              shuffle=True
                                             )
-         
+        
         final_accuracy = train(
             epochs=100, 
             model=model_0,
@@ -163,8 +187,19 @@ if __name__ == "__main__":
             optimizer=optimizer,
             device=device
         )
+
+        unlabled_subset = Subset(train_dataset, unlabeled_indices)
+
+        unlabeled_dataloader = DataLoader(dataset = unlabled_subset,
+                                          batch_size= 1,
+                                          shuffle= False
+                                          )
+        computed_gradient = compute_gradient_embedding(unlabeled_dataloader, model_0, optimizer, loss_fn, device)
         
-        queries_indices = np.random.choice(unlabeled_indices,BATCH_SIZE, replace=False)
+        relative_indices_to_query = kmeans_pp(computed_gradient, BATCH_SIZE)
+
+        queries_indices = [unlabeled_indices[i] for i in relative_indices_to_query]
+
         queried_set = set(queries_indices) # added set so it will remove duplicates faster
         
         # Below is logic to remove the new queried indices from the unlabled indices.
