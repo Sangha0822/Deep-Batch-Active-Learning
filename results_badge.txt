@@ -1,2 +1,59 @@
-Round: 1, Labeled Samples: 200, Test Accuracy: 69.98%
-Round: 2, Labeled Samples: 300, Test Accuracy: 66.29%
+--- New Trial Started ---
+Round: 1, Labeled Samples: 200, Test Accuracy: 58.04%
+Round: 2, Labeled Samples: 300, Test Accuracy: 80.21%
+Round: 3, Labeled Samples: 400, Test Accuracy: 84.59%
+Round: 4, Labeled Samples: 500, Test Accuracy: 86.21%
+Round: 5, Labeled Samples: 600, Test Accuracy: 87.73%
+Round: 6, Labeled Samples: 700, Test Accuracy: 88.74%
+Round: 7, Labeled Samples: 800, Test Accuracy: 89.45%
+Round: 8, Labeled Samples: 900, Test Accuracy: 89.87%
+Round: 9, Labeled Samples: 1000, Test Accuracy: 90.68%
+Round: 10, Labeled Samples: 1100, Test Accuracy: 90.83%
+
+--- New Trial Started ---
+Round: 1, Labeled Samples: 200, Test Accuracy: 68.41%
+Round: 2, Labeled Samples: 300, Test Accuracy: 80.81%
+Round: 3, Labeled Samples: 400, Test Accuracy: 84.36%
+Round: 4, Labeled Samples: 500, Test Accuracy: 86.24%
+Round: 5, Labeled Samples: 600, Test Accuracy: 87.46%
+Round: 6, Labeled Samples: 700, Test Accuracy: 88.99%
+Round: 7, Labeled Samples: 800, Test Accuracy: 90.29%
+Round: 8, Labeled Samples: 900, Test Accuracy: 90.60%
+Round: 9, Labeled Samples: 1000, Test Accuracy: 90.56%
+Round: 10, Labeled Samples: 1100, Test Accuracy: 91.32%
+
+--- New Trial Started ---
+Round: 1, Labeled Samples: 200, Test Accuracy: 64.56%
+Round: 2, Labeled Samples: 300, Test Accuracy: 80.91%
+Round: 3, Labeled Samples: 400, Test Accuracy: 84.47%
+Round: 4, Labeled Samples: 500, Test Accuracy: 87.50%
+Round: 5, Labeled Samples: 600, Test Accuracy: 88.16%
+Round: 6, Labeled Samples: 700, Test Accuracy: 88.83%
+Round: 7, Labeled Samples: 800, Test Accuracy: 89.93%
+Round: 8, Labeled Samples: 900, Test Accuracy: 90.46%
+Round: 9, Labeled Samples: 1000, Test Accuracy: 90.82%
+Round: 10, Labeled Samples: 1100, Test Accuracy: 91.14%
+
+--- New Trial Started ---
+Round: 1, Labeled Samples: 200, Test Accuracy: 65.99%
+Round: 2, Labeled Samples: 300, Test Accuracy: 80.94%
+Round: 3, Labeled Samples: 400, Test Accuracy: 84.96%
+Round: 4, Labeled Samples: 500, Test Accuracy: 86.77%
+Round: 5, Labeled Samples: 600, Test Accuracy: 88.49%
+Round: 6, Labeled Samples: 700, Test Accuracy: 89.61%
+Round: 7, Labeled Samples: 800, Test Accuracy: 90.11%
+Round: 8, Labeled Samples: 900, Test Accuracy: 90.70%
+Round: 9, Labeled Samples: 1000, Test Accuracy: 91.20%
+Round: 10, Labeled Samples: 1100, Test Accuracy: 91.41%
+
+--- New Trial Started ---
+Round: 1, Labeled Samples: 200, Test Accuracy: 73.55%
+Round: 2, Labeled Samples: 300, Test Accuracy: 81.64%
+Round: 3, Labeled Samples: 400, Test Accuracy: 84.34%
+Round: 4, Labeled Samples: 500, Test Accuracy: 87.57%
+Round: 5, Labeled Samples: 600, Test Accuracy: 88.72%
+Round: 6, Labeled Samples: 700, Test Accuracy: 89.32%
+Round: 7, Labeled Samples: 800, Test Accuracy: 89.53%
+Round: 8, Labeled Samples: 900, Test Accuracy: 90.40%
+Round: 9, Labeled Samples: 1000, Test Accuracy: 90.47%
+Round: 10, Labeled Samples: 1100, Test Accuracy: 90.97%

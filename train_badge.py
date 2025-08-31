@@ -14,25 +14,35 @@ from torch.utils.data import Subset
 
 from sklearn.cluster import kmeans_plusplus
 
+# There is known issue with having RuntimeWarnign with Macbook M4 chips. This is needed to produce repeated warnings.
+# Reference: https://github.com/numpy/numpy/issues/28687
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+
+
+
 def kmeans_pp (embedding, batch_size):
     embedding_np = embedding.cpu().numpy()
     _, indicies = kmeans_plusplus(embedding_np,n_clusters= batch_size)
     return indicies
 
 
-def compute_gradient_embedding(DataLoader, model, optimizer, loss_fn, device):
+def compute_gradient_embedding(DataLoader, model,  loss_fn, device):
     gradient_list = []
     model.eval()
     for X, y in DataLoader:
         X,y = X.to(device), y.to(device)
 
         logits = model(X)
-        logits = torch.clamp(logits, min=-20, max=20)
         preds = torch.argmax(logits, dim=1)
         loss = loss_fn(logits,preds)
-        optimizer.zero_grad()
-        loss.backward()
-        last_layer_gradient = model.layers[5].weight.grad
+
+        last_layer_params = model.layers[5].weight
+
+
+        (last_layer_gradient,) = torch.autograd.grad(loss, last_layer_params)
+
         gradient_list.append(last_layer_gradient.clone().detach().flatten())
     return torch.stack(gradient_list, dim=0)
 
@@ -160,7 +170,8 @@ if __name__ == "__main__":
     print(f"Initial unlabeled pool size: {len(unlabeled_indices)}")
     print("---------------------------------")
 
-    results_file = open("results_badge.txt", "w")
+    results_file = open("results_badge.txt", "a")
+    results_file.write(f"\n--- New Trial Started ---\n") 
 
     for i in range(QUERY_ROUNDS):
         model_0 = model.ModelV0().to(device)
@@ -168,7 +179,7 @@ if __name__ == "__main__":
         loss_fn = nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(
                                     model_0.parameters(),
-                                    lr = 0.001 
+                                    lr = 0.0001 
                                     )
         
         labeled_subset = Subset(train_dataset, labeled_indices)
@@ -194,7 +205,7 @@ if __name__ == "__main__":
                                           batch_size= 1,
                                           shuffle= False
                                           )
-        computed_gradient = compute_gradient_embedding(unlabeled_dataloader, model_0, optimizer, loss_fn, device)
+        computed_gradient = compute_gradient_embedding(unlabeled_dataloader, model_0, loss_fn, device)
         
         relative_indices_to_query = kmeans_pp(computed_gradient, BATCH_SIZE)
 
