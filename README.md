@@ -1,6 +1,6 @@
 # Implementation of the BADGE Active Learning Algorithm
 
-[cite_start]This project is a PyTorch implementation of the paper "Deep Batch Active Learning by Diverse, Uncertain Gradient Lower Bounds" [cite: 1-12]. The primary goal was to replicate the paper's findings by comparing the label efficiency of the BADGE algorithm against a random sampling baseline on the MNIST dataset. This work serves as the foundation for future research into optimizing and accelerating the BADGE algorithm.
+This project is a PyTorch implementation of the paper "[Deep Batch Active Learning by Diverse, Uncertain Gradient Lower Bounds](https://arxiv.org/pdf/1906.0371.pdf)". The primary goal was to replicate the paper's findings by comparing the label efficiency of the BADGE algorithm against a random sampling baseline on the MNIST dataset. This work serves as the foundation for future research into optimizing and accelerating the BADGE algorithm.
 
 ## Key Files
 * `train.py`: The main script to run the full BADGE active learning experiment.
@@ -26,11 +26,6 @@ To run this project, you'll need to set up a Python virtual environment and inst
     ```
 
 3.  **Install dependencies:**
-    *(First, create a `requirements.txt` file by running the following command in your active environment):*
-    ```bash
-    pip freeze > requirements.txt
-    ```
-    *(Then, anyone can install the exact dependencies needed for the project):*
     ```bash
     pip install -r requirements.txt
     ```
