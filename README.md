@@ -1,6 +1,6 @@
 # An Implementation and Acceleration of the BADGE Active Learning Algorithm
 
-[cite_start]This project is a PyTorch implementation of the paper "[Deep Batch Active Learning by Diverse, Uncertain Gradient Lower Bounds](https://arxiv.org/pdf/1906.0371.pdf)" [cite: 1-12]. The primary goal was to first replicate the paper's findings by comparing the BADGE algorithm against a random sampling baseline on the MNIST dataset. Subsequently, this work investigates, implements, and analyzes two novel optimization strategies—Subset Sampling and Proxy-Based Selection—to accelerate the algorithm's primary performance bottleneck.
+This project is a PyTorch implementation of the paper "[Deep Batch Active Learning by Diverse, Uncertain Gradient Lower Bounds](https://arxiv.org/pdf/1906.0371.pdf)" [cite: 1-12]. The primary goal was to first replicate the paper's findings by comparing the BADGE algorithm against a random sampling baseline on the MNIST dataset. Subsequently, this work investigates, implements, and analyzes two novel optimization strategies—Subset Sampling and Proxy-Based Selection—to accelerate the algorithm's primary performance bottleneck.
 
 ## Key Files
 * `train.py`: Runs the full BADGE active learning experiment.
