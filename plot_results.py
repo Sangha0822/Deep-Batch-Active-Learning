@@ -1,16 +1,23 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 def parse_results_file(filename):
+    """
+    Reads a results file with multiple trials and returns the labeled samples,
+    accuracies, and query times in a structured format.
+    """
     all_trials_accuracies = []
+    all_trials_times = []
     current_trial_accuracies = []
-    x_axis_samples = [] 
+    current_trial_times = []
+    x_axis_samples = []
 
     try:
-        with open(filename, 'r') as open_file:
-            all_lines = open_file.readlines()
+        with open(filename, 'r') as f:
+            all_lines = f.readlines()
     except FileNotFoundError:
-        print(f"Error: Could not find the file '{filename}'")
-        return None, None
+        print(f"Warning: The file '{filename}' was not found. Skipping.")
+        return None, None, None
 
     for line in all_lines:
         line = line.strip()
@@ -18,67 +25,96 @@ def parse_results_file(filename):
         if line.startswith('---') or not line:
             if current_trial_accuracies:
                 all_trials_accuracies.append(current_trial_accuracies)
+                all_trials_times.append(current_trial_times)
             current_trial_accuracies = []
+            current_trial_times = []
             continue
 
         parts = line.split(", ")
         sample_str = parts[1].split(": ")[1]
         accuracy_str = parts[2].split(": ")[1].strip('%\n')
+        # --- MODIFICATION: Parse the Query Time ---
+        time_str = parts[3].split(": ")[1].strip('s\n')
 
         sample_count = int(sample_str)
         accuracy = float(accuracy_str)
+        query_time = float(time_str)
 
         current_trial_accuracies.append(accuracy)
+        current_trial_times.append(query_time)
 
         if len(all_trials_accuracies) == 0:
             x_axis_samples.append(sample_count)
 
     if current_trial_accuracies:
         all_trials_accuracies.append(current_trial_accuracies)
+        all_trials_times.append(current_trial_times)
 
-    return x_axis_samples, all_trials_accuracies
+    return x_axis_samples, np.array(all_trials_accuracies), np.array(all_trials_times)
 
-
-
-x_axis, badge_data = parse_results_file("results_badge.txt")
-
-_, random_data = parse_results_file("results_random.txt")
-
-
-if badge_data and random_data:
-    print("--- BADGE Data (First Trial) ---")
-    print(badge_data[0])
-    
-    print("\n--- Random Sampling Data (First Trial) ---")
-    print(random_data[0])
+# --- 1. Parse Data for All Four Experiments ---
+x_axis, badge_acc, badge_time = parse_results_file("results_badge.txt")
+_, random_acc, random_time = parse_results_file("results_random.txt")
+_, subset_acc, subset_time = parse_results_file("results_subset_sampling.txt")
+_, proxy_acc, proxy_time = parse_results_file("results_proxy.txt")
 
 
-badge_data_np = np.array(badge_data)
-random_data_np = np.array(random_data)
+# --- 2. Create the Accuracy Plot ---
+plt.figure(figsize=(10, 7))
 
-avg_badge_accuracies = np.mean(badge_data_np, axis=0)
-avg_random_accuracies = np.mean(random_data_np, axis=0)
+# Only average and plot the data if it was successfully loaded
+if badge_acc is not None:
+    avg_badge_acc = np.mean(badge_acc, axis=0)
+    plt.plot(x_axis, avg_badge_acc, marker='o', linestyle='-', label='Full BADGE')
 
-print("Final Averaged BADGE Accuracies:", avg_badge_accuracies)
-print("Final Averaged Random Accuracies:", avg_random_accuracies)
+if subset_acc is not None:
+    avg_subset_acc = np.mean(subset_acc, axis=0)
+    plt.plot(x_axis, avg_subset_acc, marker='^', linestyle='-.', label='Subset Sampling BADGE')
 
-import matplotlib.pyplot as plt
+if proxy_acc is not None:
+    avg_proxy_acc = np.mean(proxy_acc, axis=0)
+    plt.plot(x_axis, avg_proxy_acc, marker='x', linestyle=':', label='Proxy-Based BADGE')
 
-plt.figure(figsize=(10, 7)) 
+if random_acc is not None:
+    avg_random_acc = np.mean(random_acc, axis=0)
+    plt.plot(x_axis, avg_random_acc, marker='s', linestyle='--', label='Random Sampling')
 
-plt.plot(x_axis, avg_badge_accuracies, marker='o', linestyle='-', label='BADGE Algorithm')
-
-
-plt.plot(x_axis, avg_random_accuracies, marker='s', linestyle='--', label='Random Sampling')
-
-
-plt.title('BADGE vs. Random Sampling Performance on MNIST (5 Trial Average)')
+plt.title('Algorithm Performance Comparison (5 Trial Average)')
 plt.xlabel('Number of Labeled Samples')
 plt.ylabel('Average Test Accuracy (%)')
-plt.legend() # Displays the labels for each curve
-plt.grid(True) # Adds a grid for easier reading
+plt.legend()
+plt.grid(True)
+plt.savefig('accuracy_comparison.png')
+print("Accuracy comparison plot saved as accuracy_comparison.png")
+plt.show()
 
 
-plt.savefig('badge_vs_random_comparison.png')
+# --- 3. Create the Query Time Plot ---
+plt.figure(figsize=(10, 7))
 
+# Only average and plot the data if it was successfully loaded
+if badge_time is not None:
+    avg_badge_time = np.mean(badge_time, axis=0)
+    plt.plot(x_axis, avg_badge_time, marker='o', linestyle='-', label='Full BADGE')
+
+if subset_time is not None:
+    avg_subset_time = np.mean(subset_time, axis=0)
+    plt.plot(x_axis, avg_subset_time, marker='^', linestyle='-.', label='Subset Sampling BADGE')
+
+if proxy_time is not None:
+    avg_proxy_time = np.mean(proxy_time, axis=0)
+    plt.plot(x_axis, avg_proxy_time, marker='x', linestyle=':', label='Proxy-Based BADGE')
+
+if random_time is not None:
+    avg_random_time = np.mean(random_time, axis=0)
+    plt.plot(x_axis, avg_random_time, marker='s', linestyle='--', label='Random Sampling')
+
+plt.title('Query Time Comparison (5 Trial Average)')
+plt.xlabel('Number of Labeled Samples')
+plt.ylabel('Average Query Time (seconds)')
+plt.yscale('log')
+plt.legend()
+plt.grid(True)
+plt.savefig('query_time_comparison.png')
+print("Query time comparison plot saved as query_time_comparison.png")
 plt.show()

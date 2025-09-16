@@ -12,10 +12,85 @@ import model as model
 import numpy as np
 from torch.utils.data import Subset
 
+from sklearn.cluster import kmeans_plusplus
+
+# There is known issue with having RuntimeWarnign with Macbook M4 chips. This is needed to remove repeated warnings.
+# Reference: https://github.com/numpy/numpy/issues/28687
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
 import time
 
-def train(epochs, model, train_dataloader, test_dataloader, loss_fn, optimizer, device):
+
+class IndexedSubset(Subset):
+            def __getitem__(self, idx):
+                data, target = self.dataset[self.indices[idx]]
+                return data, self.indices[idx]
+            
+# Replace your old get_least_confident_indices function with this one
+
+def get_least_confident_indices(model, dataset, unlabeled_indices, num_to_select, device):
+    """
+    Performs a fast forward pass on the unlabeled data to find the
+    indices of samples with the lowest confidence.
+    """
+    model.eval()
     
+    # Create a subset and dataloader for the unlabeled data
+    unlabeled_subset = Subset(dataset, unlabeled_indices)
+    unlabeled_dataloader = DataLoader(unlabeled_subset, batch_size=256, shuffle=False)
+    
+    all_confidences = []
+
+    with torch.no_grad():
+        for X_batch, _ in unlabeled_dataloader: # We don't need the labels here
+            X_batch = X_batch.to(device)
+            
+            logits = model(X_batch)
+            probabilities = torch.softmax(logits, dim=1)
+            confidence, _ = torch.max(probabilities, dim=1)
+            
+            all_confidences.append(confidence.cpu())
+            
+    all_confidences = torch.cat(all_confidences)
+    
+    # Get the indices of the samples with the LOWEST confidence scores
+    # These indices are RELATIVE to the unlabeled_subset
+    _, relative_indices = torch.topk(all_confidences, k=num_to_select, largest=False)
+    
+    # Map these relative indices back to the original dataset indices
+    # by indexing into the unlabeled_indices list
+    original_indices = np.array(unlabeled_indices)[relative_indices.numpy()]
+    
+    return original_indices
+
+
+def kmeans_pp (embedding, batch_size):
+    embedding_np = embedding.cpu().numpy()
+    _, indicies = kmeans_plusplus(embedding_np,n_clusters= batch_size)
+    return indicies
+
+
+def compute_gradient_embedding(DataLoader, model,  loss_fn, device):
+    gradient_list = []
+    model.eval()
+    for X, y in DataLoader:
+        X,y = X.to(device), y.to(device)
+
+        logits = model(X)
+        preds = torch.argmax(logits, dim=1)
+        loss = loss_fn(logits,preds)
+
+        last_layer_params = model.layers[5].weight
+
+
+        (last_layer_gradient,) = torch.autograd.grad(loss, last_layer_params)
+
+        gradient_list.append(last_layer_gradient.clone().detach().flatten())
+    return torch.stack(gradient_list, dim=0)
+
+def train(epochs, model, train_dataloader, test_dataloader, loss_fn, optimizer, device):
+
     for epoch in range(epochs):
         # Training loop:
         model.train() 
@@ -99,6 +174,7 @@ if __name__ == "__main__":
         BATCH_SIZE = 100
 
         INITIAL_LABELS = 100
+        CANDIDATE_SET_SIZE = 5000
 
         transform = transforms.Compose([
             transforms.ToTensor(),
@@ -142,7 +218,7 @@ if __name__ == "__main__":
         print(f"Initial unlabeled pool size: {len(unlabeled_indices)}")
         print("---------------------------------")
 
-        results_file = open("results_random.txt", "a")
+        results_file = open("results_proxy.txt", "a")
         results_file.write(f"\n--- New Trial Started ---\n") 
 
         for i in range(QUERY_ROUNDS):
@@ -170,13 +246,29 @@ if __name__ == "__main__":
                 optimizer=optimizer,
                 device=device
             )
-            start_time = time.time()
-            queries_indices = np.random.choice(unlabeled_indices,BATCH_SIZE, replace=False)
 
-            #Measuring query time for each inidividual round
+            start_time = time.time()
+            
+            # (Fast Proxy Filter) Get the most promising candidates directly
+            print(f"Finding {CANDIDATE_SET_SIZE} least confident samples from {len(unlabeled_indices)}...")
+            candidate_indices = get_least_confident_indices(model_0, train_dataset, unlabeled_indices, CANDIDATE_SET_SIZE, device)
+
+            # (Expensive BADGE Selection) Run BADGE only on this smaller, smarter set
+            badge_subset = Subset(train_dataset, candidate_indices)
+            badge_dataloader = DataLoader(dataset=badge_subset,
+                                        batch_size=1,
+                                        shuffle=False)
+            
+            print(f"Running BADGE on the {len(candidate_indices)} most promising candidates...")
+            computed_gradient = compute_gradient_embedding(badge_dataloader, model_0, loss_fn, device)
+            relative_indices_to_query = kmeans_pp(computed_gradient, BATCH_SIZE)
+
+            queries_indices = [candidate_indices[i] for i in relative_indices_to_query]
+
             end_time = time.time()
             query_time = end_time - start_time
-            queried_set = set(queries_indices) # added set so it will remove duplicates faster
+
+            queried_set = set(queries_indices) 
             
             # Below is logic to remove the new queried indices from the unlabled indices.
             new_unlabled_indices = []

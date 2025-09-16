@@ -1,0 +1,60 @@
+
+--- New Trial Started ---
+Round: 1, Labeled Samples: 200, Test Accuracy: 60.66%, Query Time: 9.53s
+Round: 2, Labeled Samples: 300, Test Accuracy: 76.18%, Query Time: 8.64s
+Round: 3, Labeled Samples: 400, Test Accuracy: 84.58%, Query Time: 7.87s
+Round: 4, Labeled Samples: 500, Test Accuracy: 86.97%, Query Time: 8.19s
+Round: 5, Labeled Samples: 600, Test Accuracy: 88.62%, Query Time: 7.72s
+Round: 6, Labeled Samples: 700, Test Accuracy: 89.88%, Query Time: 7.99s
+Round: 7, Labeled Samples: 800, Test Accuracy: 90.14%, Query Time: 7.89s
+Round: 8, Labeled Samples: 900, Test Accuracy: 91.16%, Query Time: 7.74s
+Round: 9, Labeled Samples: 1000, Test Accuracy: 91.08%, Query Time: 7.75s
+Round: 10, Labeled Samples: 1100, Test Accuracy: 91.35%, Query Time: 7.75s
+
+--- New Trial Started ---
+Round: 1, Labeled Samples: 200, Test Accuracy: 58.66%, Query Time: 7.85s
+Round: 2, Labeled Samples: 300, Test Accuracy: 76.26%, Query Time: 7.65s
+Round: 3, Labeled Samples: 400, Test Accuracy: 83.10%, Query Time: 7.60s
+Round: 4, Labeled Samples: 500, Test Accuracy: 86.44%, Query Time: 7.68s
+Round: 5, Labeled Samples: 600, Test Accuracy: 86.96%, Query Time: 7.74s
+Round: 6, Labeled Samples: 700, Test Accuracy: 89.05%, Query Time: 7.70s
+Round: 7, Labeled Samples: 800, Test Accuracy: 89.57%, Query Time: 7.74s
+Round: 8, Labeled Samples: 900, Test Accuracy: 90.33%, Query Time: 7.79s
+Round: 9, Labeled Samples: 1000, Test Accuracy: 90.53%, Query Time: 7.71s
+Round: 10, Labeled Samples: 1100, Test Accuracy: 91.79%, Query Time: 7.65s
+
+--- New Trial Started ---
+Round: 1, Labeled Samples: 200, Test Accuracy: 66.84%, Query Time: 7.83s
+Round: 2, Labeled Samples: 300, Test Accuracy: 78.79%, Query Time: 7.63s
+Round: 3, Labeled Samples: 400, Test Accuracy: 80.42%, Query Time: 7.69s
+Round: 4, Labeled Samples: 500, Test Accuracy: 86.52%, Query Time: 7.71s
+Round: 5, Labeled Samples: 600, Test Accuracy: 88.75%, Query Time: 7.60s
+Round: 6, Labeled Samples: 700, Test Accuracy: 89.40%, Query Time: 8.22s
+Round: 7, Labeled Samples: 800, Test Accuracy: 90.26%, Query Time: 7.83s
+Round: 8, Labeled Samples: 900, Test Accuracy: 90.73%, Query Time: 7.60s
+Round: 9, Labeled Samples: 1000, Test Accuracy: 91.52%, Query Time: 8.18s
+Round: 10, Labeled Samples: 1100, Test Accuracy: 91.72%, Query Time: 7.70s
+
+--- New Trial Started ---
+Round: 1, Labeled Samples: 200, Test Accuracy: 64.30%, Query Time: 8.26s
+Round: 2, Labeled Samples: 300, Test Accuracy: 81.70%, Query Time: 7.82s
+Round: 3, Labeled Samples: 400, Test Accuracy: 84.96%, Query Time: 7.88s
+Round: 4, Labeled Samples: 500, Test Accuracy: 86.53%, Query Time: 7.75s
+Round: 5, Labeled Samples: 600, Test Accuracy: 88.60%, Query Time: 7.66s
+Round: 6, Labeled Samples: 700, Test Accuracy: 89.26%, Query Time: 7.70s
+Round: 7, Labeled Samples: 800, Test Accuracy: 90.49%, Query Time: 7.66s
+Round: 8, Labeled Samples: 900, Test Accuracy: 90.69%, Query Time: 7.67s
+Round: 9, Labeled Samples: 1000, Test Accuracy: 91.60%, Query Time: 7.40s
+Round: 10, Labeled Samples: 1100, Test Accuracy: 92.22%, Query Time: 7.48s
+
+--- New Trial Started ---
+Round: 1, Labeled Samples: 200, Test Accuracy: 68.26%, Query Time: 7.51s
+Round: 2, Labeled Samples: 300, Test Accuracy: 79.80%, Query Time: 7.55s
+Round: 3, Labeled Samples: 400, Test Accuracy: 85.18%, Query Time: 7.54s
+Round: 4, Labeled Samples: 500, Test Accuracy: 86.72%, Query Time: 7.51s
+Round: 5, Labeled Samples: 600, Test Accuracy: 88.48%, Query Time: 7.50s
+Round: 6, Labeled Samples: 700, Test Accuracy: 89.35%, Query Time: 7.56s
+Round: 7, Labeled Samples: 800, Test Accuracy: 90.01%, Query Time: 7.44s
+Round: 8, Labeled Samples: 900, Test Accuracy: 90.70%, Query Time: 7.57s
+Round: 9, Labeled Samples: 1000, Test Accuracy: 91.33%, Query Time: 7.52s
+Round: 10, Labeled Samples: 1100, Test Accuracy: 92.37%, Query Time: 7.36s

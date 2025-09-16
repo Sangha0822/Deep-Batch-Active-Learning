@@ -14,12 +14,12 @@ from torch.utils.data import Subset
 
 from sklearn.cluster import kmeans_plusplus
 
-# There is known issue with having RuntimeWarnign with Macbook M4 chips. This is needed to produce repeated warnings.
+# There is known issue with having RuntimeWarnign with Macbook M4 chips. This is needed to remove repeated warnings.
 # Reference: https://github.com/numpy/numpy/issues/28687
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-
+import time
 
 
 def kmeans_pp (embedding, batch_size):
@@ -121,114 +121,125 @@ def train(epochs, model, train_dataloader, test_dataloader, loss_fn, optimizer, 
     return test_accuracy
 
 if __name__ == "__main__":
-    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
-
-    QUERY_ROUNDS = 10
-    BATCH_SIZE = 100
-
-    INITIAL_LABELS = 100
-
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
-    ])
-
-
-    train_dataset = datasets.MNIST(
-        root = "./data",
-        train = True,
-        download = True,
-        transform = transform
-    )
-
-    test_dataset = datasets.MNIST(
-        root = "./data",
-        train = False,
-        download = True,
-        transform = transform
-    )
-
-    train_dataloader = DataLoader(dataset= train_dataset, 
-                                batch_size= BATCH_SIZE,
-                                shuffle=True
-                                )
-    test_dataloader =  DataLoader(dataset= test_dataset, 
-                                batch_size= BATCH_SIZE, 
-                                shuffle= True
-                                )
+    NUM_TRIALS = 5
     
-    num_train_data = len(train_dataset)
-    all_indices = list(range(num_train_data))
+    for trial in range(NUM_TRIALS):
+        print(f"\n\n===== Starting Trial {trial + 1}/{NUM_TRIALS} =====\n")
+        device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
-    np.random.shuffle(all_indices)
+        QUERY_ROUNDS = 10
+        BATCH_SIZE = 100
 
-    labeled_indices = all_indices[:INITIAL_LABELS]
-    unlabeled_indices = all_indices[INITIAL_LABELS:]
+        INITIAL_LABELS = 100
 
-    print(f"--- Data Pool Initialization ---")
-    print(f"Initial labeled pool size: {len(labeled_indices)}")
-    print(f"Initial unlabeled pool size: {len(unlabeled_indices)}")
-    print("---------------------------------")
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.1307,), (0.3081,))
+        ])
 
-    results_file = open("results_badge.txt", "a")
-    results_file.write(f"\n--- New Trial Started ---\n") 
 
-    for i in range(QUERY_ROUNDS):
-        model_0 = model.ModelV0().to(device)
-
-        loss_fn = nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(
-                                    model_0.parameters(),
-                                    lr = 0.0001 
-                                    )
-        
-        labeled_subset = Subset(train_dataset, labeled_indices)
-
-        active_train_dataloader = DataLoader(dataset=labeled_subset,
-                                             batch_size= BATCH_SIZE,
-                                             shuffle=True
-                                            )
-        
-        final_accuracy = train(
-            epochs=100, 
-            model=model_0,
-            train_dataloader= active_train_dataloader,
-            test_dataloader = test_dataloader,
-            loss_fn=loss_fn,
-            optimizer=optimizer,
-            device=device
+        train_dataset = datasets.MNIST(
+            root = "./data",
+            train = True,
+            download = True,
+            transform = transform
         )
 
-        unlabled_subset = Subset(train_dataset, unlabeled_indices)
+        test_dataset = datasets.MNIST(
+            root = "./data",
+            train = False,
+            download = True,
+            transform = transform
+        )
 
-        unlabeled_dataloader = DataLoader(dataset = unlabled_subset,
-                                          batch_size= 1,
-                                          shuffle= False
-                                          )
-        computed_gradient = compute_gradient_embedding(unlabeled_dataloader, model_0, loss_fn, device)
+        train_dataloader = DataLoader(dataset= train_dataset, 
+                                    batch_size= BATCH_SIZE,
+                                    shuffle=True
+                                    )
+        test_dataloader =  DataLoader(dataset= test_dataset, 
+                                    batch_size= BATCH_SIZE, 
+                                    shuffle= True
+                                    )
         
-        relative_indices_to_query = kmeans_pp(computed_gradient, BATCH_SIZE)
+        num_train_data = len(train_dataset)
+        all_indices = list(range(num_train_data))
 
-        queries_indices = [unlabeled_indices[i] for i in relative_indices_to_query]
+        np.random.shuffle(all_indices)
 
-        queried_set = set(queries_indices) # added set so it will remove duplicates faster
-        
-        # Below is logic to remove the new queried indices from the unlabled indices.
-        new_unlabled_indices = []
-        for index in unlabeled_indices:
-            if index not in queried_set:
-                new_unlabled_indices.append(index)
-        unlabeled_indices = new_unlabled_indices
+        labeled_indices = all_indices[:INITIAL_LABELS]
+        unlabeled_indices = all_indices[INITIAL_LABELS:]
 
-        labeled_indices.extend(queries_indices)
+        print(f"--- Data Pool Initialization ---")
+        print(f"Initial labeled pool size: {len(labeled_indices)}")
+        print(f"Initial unlabeled pool size: {len(unlabeled_indices)}")
+        print("---------------------------------")
 
-        # Write the result into the results_random.txt file
-        log_entry = f"Round: {i+1}, Labeled Samples: {len(labeled_indices)}, Test Accuracy: {final_accuracy:.2f}%\n"
-        results_file.write(log_entry)
-        print(log_entry)
-    results_file.close()
-# Save and load:
-# save_model(model_0, target_dir="models", model_name="mnist_v0.pth")
-# model_loaded = utils.load_model("models/mnist_v0.pt", device=device)
-# print(model_loaded.state_dict())
-    
+        results_file = open("results_badge.txt", "a")
+        results_file.write(f"\n--- New Trial Started ---\n") 
+
+        for i in range(QUERY_ROUNDS):
+            model_0 = model.ModelV0().to(device)
+
+            loss_fn = nn.CrossEntropyLoss()
+            optimizer = torch.optim.Adam(
+                                        model_0.parameters(),
+                                        lr = 0.0001 
+                                        )
+            
+            labeled_subset = Subset(train_dataset, labeled_indices)
+
+            active_train_dataloader = DataLoader(dataset=labeled_subset,
+                                                batch_size= BATCH_SIZE,
+                                                shuffle=True
+                                                )
+            
+            final_accuracy = train(
+                epochs=100, 
+                model=model_0,
+                train_dataloader= active_train_dataloader,
+                test_dataloader = test_dataloader,
+                loss_fn=loss_fn,
+                optimizer=optimizer,
+                device=device
+            )
+            start_time = time.time()
+            
+            unlabled_subset = Subset(train_dataset, unlabeled_indices)
+
+            unlabeled_dataloader = DataLoader(dataset = unlabled_subset,
+                                            batch_size= 1,
+                                            shuffle= False
+                                            )
+            computed_gradient = compute_gradient_embedding(unlabeled_dataloader, model_0, loss_fn, device)
+            
+            relative_indices_to_query = kmeans_pp(computed_gradient, BATCH_SIZE)
+
+            
+
+            queries_indices = [unlabeled_indices[i] for i in relative_indices_to_query]
+
+            end_time = time.time()
+            query_time = end_time - start_time
+
+            queried_set = set(queries_indices) # added set so it will remove duplicates faster
+            
+            # Below is logic to remove the new queried indices from the unlabled indices.
+            new_unlabled_indices = []
+            for index in unlabeled_indices:
+                if index not in queried_set:
+                    new_unlabled_indices.append(index)
+            unlabeled_indices = new_unlabled_indices
+
+            labeled_indices.extend(queries_indices)
+
+            # Write the result into the results_random.txt file
+            
+            log_entry = f"Round: {i+1}, Labeled Samples: {len(labeled_indices)}, Test Accuracy: {final_accuracy:.2f}%, Query Time: {query_time:.2f}s\n"
+            results_file.write(log_entry)
+            print(log_entry)
+        results_file.close()
+    # Save and load:
+    # save_model(model_0, target_dir="models", model_name="mnist_v0.pth")
+    # model_loaded = utils.load_model("models/mnist_v0.pt", device=device)
+    # print(model_loaded.state_dict())
+    print("\n\n===== All trials completed. =====")
